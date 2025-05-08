@@ -1,0 +1,8 @@
+-------------------
+|  Admin          |
+|-----------------|
+| Name: String    |
+| Address: String | //Hash
+| Added By: String| //Hash
+-------------------
+

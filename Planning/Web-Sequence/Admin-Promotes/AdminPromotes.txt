@@ -1,0 +1,8 @@
+title Promote Admin
+Admin -> Web: Input Address and request it becomes an admin
+Web -> BackEnd: Pass Data
+BackEnd -> BackEnd: Hash Address
+BackEnd -> Smart-Contract: Add Admin
+Smart-Contract -> BackEnd: Return Success
+BackEnd -> Web: Return Success
+Web -> Admin: Display Success

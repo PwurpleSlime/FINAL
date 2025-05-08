@@ -1,0 +1,9 @@
+-------------------------
+|   Meeting             |
+|-----------------------|
+| host: VarChar         | // Hash
+| timeStart: VarChar    |
+| dateStart: VarChar    |
+| timeEnd: VarChar      |
+| address: VarChar      |
+-------------------------
