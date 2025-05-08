@@ -1,0 +1,14 @@
+title User Goes to Poker
+User -> IOS-FrontEnd: Looks for Meeting
+IOS-FrontEnd -> Back-End: Asks for Meetings
+Back-End -> Database: Request Meetings
+Database -> Back-End: Returns list of Meetings
+Back-End -> IOS-FrontEnd: Returns list of Meetings
+IOS-FrontEnd -> User: Displays list of Meetings
+User -> IOS-FrontEnd: Request Verification of Meetings Location
+IOS-FrontEnd -> Back-End: Request Verificaiton 
+Back-End -> Smart-Contract: Request Verification
+Smart-Contract -> Back-End: Return Verification
+Back-End -> IOS-FrontEnd: Return Verification
+IOS-FrontEnd -> User: Display verification
+User -> Meeting Location: Go There
