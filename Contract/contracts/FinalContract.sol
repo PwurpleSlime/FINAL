@@ -10,7 +10,7 @@ contract FinalContract is Ownable {
         string addr; // Should Always be HASH
     }
     Admin[] private adminList;
-    constructor(address initialOwner, string memory _name) Ownable(initialOwner) {}
+    constructor( string memory _name) Ownable(msg.sender) {}
 
     function _isAlreadyAdmin(string memory _addrHash) internal view returns (bool) {
         for (uint i = 0; i < adminList.length; i++) {
