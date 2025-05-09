@@ -3,11 +3,8 @@
 
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-const JAN_1ST_2030 = 1893456000;
-const ONE_GWEI: bigint = 1_000_000_000n;
-
 const FinalContractModule = buildModule("LockModule", (m) => {
-  const FinalContract = m.contract("FinalContract");
+  const FinalContract = m.contract("FinalContract", ["0x70997970C51812dc3A010C7d01b50e0d17dc79C8", "John Doe"]);
 
   return { FinalContract };
 });
