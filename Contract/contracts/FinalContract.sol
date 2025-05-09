@@ -2,15 +2,15 @@
 // Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.27;
 
-import {Ownable} from "@openzeppelin/contracts@5.3.0/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyContract is Ownable {
+contract FinalContract is Ownable {
     struct Admin{
         string name;
         string addr; // Should Always be HASH
     }
     Admin[] private adminList;
-    constructor(address initialOwner, string memory _name) Ownable(initialOwner) {}
+    constructor( string memory _name) Ownable(msg.sender) {}
 
     function _isAlreadyAdmin(string memory _addrHash) internal view returns (bool) {
         for (uint i = 0; i < adminList.length; i++) {
