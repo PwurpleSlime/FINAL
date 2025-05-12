@@ -1,22 +1,65 @@
 "use client"
 // Imports
-// Run npm i --save-dev @types/three
-import Image from "next/image";
 import styles from './page.module.css';
 import * as THREE from 'three';
-import { useEffect, useRef, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { ethers } from "ethers"
+import { AdminCard } from "./Components/index" 
+
 // End o Imports
 // Start of page.tsx
 const thre = true
+const centerPoint = new THREE.Vector3(0,0,0)
+let distance = 8
+let angle = 0
+const pivotPoint = [0,3,0]
+
 export default function Home() {
   const boxRef = useRef(null); // What is this damn thing
+  const adminRef = useRef(null)
+  const [hasWallet, setWallet] = useState(false)
+  const [isConnected, setIsConnected] = useState(false)
+  const [isAdminPage, setIsAdminPage] = useState(true)
+  const [walletIsAvalible, setWalletIsAvalible] = useState(true)
+  const [account, setAccount] = useState<string | null>(null)
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
+  const [adminList, setAdminList] = useState<any[]>([])
+  const [elements, setElements] = useState<JSX.Element[]>([]);
 
+
+
+
+  useEffect(()=>{
+    const adminZone = document.querySelector(".adminZone")
+
+    setAdminList([
+      "Alice White",
+      "Bob Vance",
+      "John Skyrim"
+    ])
+
+
+    if (adminRef){
+      if (adminList != null){
+        if (adminZone){
+          for (let i = 0; i < 1; i++) {
+            const card = AdminCard(adminList[i])
+            
+          }
+        }
+      }
+    }
+  }, [isAdminPage])
   if (thre){
   // THREE vars. That is four vars hmmmmm?
   const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null); // gets canvas?
   const [renderer, setRenderer] = useState<THREE.WebGLRenderer | null>(null); // renders it
   const [controls, setControls] = useState<OrbitControls | null>(null); // allows movement
+
+  const addElement = () => {
+    setElements([...elements, <p key={elements.length}>Hello</p>]);
+  };
 
   // Resize three
   const [width, setWidth] = useState<number>(0);
@@ -62,17 +105,43 @@ export default function Home() {
       }
     
 
-    camera.position.setZ(10); // Sets the camera posistion as to let me see the stuff
 
-    // HERE
-    // Makes a wireframe cube
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 ); 
-    const material = new THREE.MeshBasicMaterial( {color: 0x00ff00, wireframe: true}); 
-    const cube = new THREE.Mesh( geometry, material ); 
-    cube.position.set( 0, 0, 0)
-    scene.add( cube );
+
+
+    function makeStars(posRange:number,negRange:number,amount:number,r:number,g:number,b:number) {
+      for (let i = 0; i < amount; i++) {
+        const starGeometry = new THREE.SphereGeometry(0.5, 32, 32)
+        const starMesh = new THREE.MeshBasicMaterial({ color: new THREE.Color(r,g,b) })
+        const star = new THREE.Mesh( starGeometry, starMesh)
+        let num1 = Math.random()*posRange - Math.random()*negRange
+        if (num1<=8 && num1>=-8){
+          num1+=20
+        }
+        let num2 = Math.random()*posRange - Math.random()*negRange
+        if (num2<=8 && num2>=-8){
+          num2+=20
+        }
+        let num3 = Math.random()*posRange - Math.random()*negRange
+        if (num3<=8 && num3>=-8){
+          num3+=20
+        }
+
+        star.position.set(num1,num2,num3)
+        scene.add(star)
+        
+      }
+    }
+
+    makeStars(300,300,600,255,255,255)
 
     const animate = () => {
+      angle += 0.001
+      camera.position.set(pivotPoint[0] + distance * Math.sin(angle), pivotPoint[1], pivotPoint[2] + distance * Math.cos(angle))
+      camera.lookAt(centerPoint);
+
+
+
+
       requestAnimationFrame(animate)
       controls?.update();
       renderer?.render(scene, camera);
@@ -106,18 +175,117 @@ export default function Home() {
 
 
   }
-  return (
-    <>
+
+  async function attemptConnect(){
+    if ((window as any).ethereum){
+      try {
+        let provider = new ethers.BrowserProvider((window as any).ethereum)
+        let signer = await provider.getSigner()
+        const userAddress = await signer.getAddress()
+        console.log(provider);
+        console.log(signer);
+
+        setProvider(provider)
+        setAccount(userAddress)
+        console.log('Wallet Connected:',userAddress);
+        setIsConnected(true)
+        
+      }catch{
+        console.error("Wallet connection failed:", Error)
+      }
+    }else{
+      setWalletIsAvalible(false)
+
+    }
+  }
+
+  if (!walletIsAvalible){
+    return (
+      <>
       <div>
-        <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className="bg"></canvas> 
+        <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
         {/* Still have not the faintest idea what box Ref is */}
       </div>
 
-    <div className={styles.page}>
+      <div className={styles.page}>
+        <h1>Please connect a metamask wallet, using the metamask browser plugin</h1>
+        <h1>Then you may reload this page and continue</h1>
+      </div>
+      </>
+    )
+  }else if (!isConnected) {
+    return (
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
 
-    </div>
+      <div className={styles.page}>
+        <button onClick={()=>{
+          attemptConnect()
+        }}><h1>Connect Wallet</h1></button>
+      </div>
 
-    </>
-  );
+      </>
+    );
+  }else if (isAdminPage){
+    return (
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+
+      <section className={styles.header}>
+        <div className={styles.big}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+        }} className={styles.small}>
+          <button><h1>Meeting</h1></button>
+        </div>
+      </section>
+      <div className={styles.page}>
+        <div className="adminZone">
+          {adminList.map((admin, index) => (
+            <AdminCard key={index} adminName={admin} />
+          ))}
+        </div>
+      </div>
+      </>
+    )
+  }else {
+    return (
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+
+      <section className={styles.header}>
+        <div className={styles.small}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+        }} className={styles.big}>
+          <button><h1>Meeting</h1></button>
+        </div>
+      </section>
+      <div className={styles.page}>
+        <h1>Meeting</h1>
+      </div>
+
+      </>
+    )
+  }
 }
 // End of page.tsx
