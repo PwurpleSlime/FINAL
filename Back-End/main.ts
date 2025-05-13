@@ -94,6 +94,17 @@ app.get("/getMeetingPlaces", ( _ , response)=>{
   })
   
 })
+app.post("/addAdmin", async( req , response)=>{
+  const {newName, newAddr, adderAddr} = req.body
+  console.log("new name", newName);
+  console.log("new Address", newAddr);
+  console.log("Old Addrss", adderAddr);
+  
+  
+  
+  await contract.addAdmin(newAddr, adderAddr, newName)
+  response.send("Ran")
+})
 app.post("/addAdminOwner", async( req , response)=>{
   const {name, newAddr} = req.body
   const addrHash = await hashString(newAddr)

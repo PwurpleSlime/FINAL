@@ -4,7 +4,7 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 const FinalContractModule = buildModule("LockModule", (m) => {
-  const FinalContract = m.contract("FinalContract", ["John Doe"]);
+  const FinalContract = m.contract("FinalContract", ["John Doe", "TestHash"]);
 
   return { FinalContract };
 });

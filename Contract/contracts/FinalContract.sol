@@ -8,9 +8,15 @@ contract FinalContract is Ownable {
     struct Admin{
         string name;
         string addr; // Should Always be HASH
+
     }
     Admin[] private adminList;
-    constructor( string memory _name) Ownable(msg.sender) {}
+    constructor( string memory _firstAdminName, string memory _firstAdminHash) Ownable(msg.sender) {
+        adminList.push(Admin({
+            name: _firstAdminName,
+            addr: _firstAdminHash
+        }));
+    }
 
     function _isAlreadyAdmin(string memory _addrHash) internal view returns (bool) {
         for (uint i = 0; i < adminList.length; i++) {
@@ -52,6 +58,7 @@ contract FinalContract is Ownable {
         return true;
     }
     
+
     function verifyAdmin(string memory _addrHash) public view returns (bool) {
         return _isAlreadyAdmin(_addrHash);
     }
