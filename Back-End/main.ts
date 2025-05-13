@@ -72,9 +72,27 @@ app.get("/getAdminNameList", async( _ , response)=>{
 
   
   response.send(list)
-  // response.send("yes")
 })
-
+app.get("/getMeetingPlaces", ( _ , response)=>{
+  
+  const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'web',
+    password: 'AGoodPassword',
+    database: 'Final'
+  })
+  
+  connection.connect((err)=>{
+    if (err) console.error(err)
+  })
+  
+  connection.query(`SELECT * FROM Meeting`, (err, result)=>{
+    if (err) throw err
+    console.log(result);
+    response.send(result)
+  })
+  
+})
 app.post("/addAdminOwner", async( req , response)=>{
   const {name, newAddr} = req.body
   const addrHash = await hashString(newAddr)
