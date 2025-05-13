@@ -1,0 +1,9 @@
+.page{
+    color: black;
+    width: 70vw;
+    display: flex;
+    height: 8vh;
+    margin: 3px;
+    align-items: center;
+    background-color: #D9D9D9;
+}
