@@ -99,10 +99,14 @@ app.post("/addAdmin", async( req , response)=>{
   console.log("new name", newName);
   console.log("new Address", newAddr);
   console.log("Old Addrss", adderAddr);
+  const newAddrHash = await hashString(newAddr)
+  const oldAddrHash = await hashString(adderAddr)
+  console.log(newAddrHash, "Added Hash");
+  console.log(oldAddrHash, "Sender Hash");
   
   
   
-  await contract.addAdmin(newAddr, adderAddr, newName)
+  await contract.addAdmin(newAddrHash, oldAddrHash, newName)
   response.send("Ran")
 })
 app.post("/addAdminOwner", async( req , response)=>{

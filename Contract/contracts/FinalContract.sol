@@ -11,7 +11,7 @@ contract FinalContract is Ownable {
 
     }
     Admin[] private adminList;
-    constructor( string memory _firstAdminName, string memory _firstAdminHash) Ownable(msg.sender) {
+    constructor( string memory _firstAdminName, string memory _firstAdminHash, address _initialOwner) Ownable(_initialOwner) {
         adminList.push(Admin({
             name: _firstAdminName,
             addr: _firstAdminHash
@@ -58,7 +58,26 @@ contract FinalContract is Ownable {
         return true;
     }
     
+    function removeAdmin(string memory _removeAddrHash, string memory _adminAddrHash)public returns (bool){
+                bool senderIsAdmin = false;
+        for (uint i = 0; i < adminList.length; i++) {
+            if (keccak256(abi.encodePacked(adminList[i].addr)) == keccak256(abi.encodePacked(_adminAddrHash))) {
+                senderIsAdmin = true;
+                break;
+            }
+        }
+        if (!senderIsAdmin) return false;
+        if (!_isAlreadyAdmin(_removeAddrHash)) return false;
+        for (uint i = 0; i < adminList.length; i++) {
+            if (keccak256(abi.encodePacked(adminList[i].addr)) == keccak256(abi.encodePacked(_removeAddrHash))) {
+                adminList[i] = adminList[adminList.length - 1]; // Replace with last element
+                adminList.pop(); // Remove last element
+                return true;
+            }
+        }
+        return false;
 
+    }
     function verifyAdmin(string memory _addrHash) public view returns (bool) {
         return _isAlreadyAdmin(_addrHash);
     }
