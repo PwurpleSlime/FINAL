@@ -117,18 +117,10 @@ app.post("/addAdminOwner", async( req , response)=>{
 })
 app.post("/addMeeting", ( req , response)=>{
   let {host, timeStart, dateStart, timeEnd, address} = req.body
-  console.log("Request body:", req.body);
-
-  console.log("first");
-  
-  if (timeEnd === null || timeEnd === undefined){
-    console.log("time end:", timeEnd);
-    
+  console.log("Request body:", req.body);  
+  if (timeEnd === null || timeEnd === undefined){    
     timeEnd = ""
-    console.log("second");
   }
-
-  console.log("Third");
   if (!host || !timeStart || !dateStart || !address) {
     response.send("Missing Required Fields")
     return
@@ -138,10 +130,8 @@ app.post("/addMeeting", ( req , response)=>{
     connection.query(query, values, (err, result)=>{
       if (err) throw err
       console.log(result);
-      console.log("Sixth");
       response.send(result)
     })
-    console.log("Seventh");
     
 })
 app.post("/verifyAdmin", async( req , response)=>{
