@@ -1,10 +1,9 @@
 // @ts-types="npm:@types/express"
-import express from "express" // Errors out with npm:express, no idea why
-import {ethers} from "ethers" // Same Issue ---^
+import express from "npm:express" 
+import {ethers} from "npm:ethers" 
 import artifact from "../Contract/artifacts/contracts/FinalContract.sol/FinalContract.json" with { type: "json"}
-import cors from "cors"
-import mysql from "mysql2"
-import process from "node:process";
+import cors from "npm:cors"
+import mysql from "npm:mysql2"
 import "jsr:@std/dotenv/load";
 import { env } from 'node:process';
 
@@ -39,7 +38,9 @@ const connection = mysql.createConnection({
   password: 'AGoodPassword',
   database: 'Final'
 })
-
+connection.connect((err)=>{
+  if (err) console.error(err)
+})
 
 async function hashString(input: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -72,12 +73,77 @@ app.get("/getAdminNameList", async( _ , response)=>{
 
   
   response.send(list)
-  // response.send("yes")
 })
-
+app.get("/getMeetingPlaces", ( _ , response)=>{
+  
+  const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'web',
+    password: 'AGoodPassword',
+    database: 'Final'
+  })
+  
+  connection.connect((err)=>{
+    if (err) console.error(err)
+  })
+  
+  connection.query(`SELECT * FROM Meeting`, (err, result)=>{
+    if (err) throw err
+    console.log(result);
+    response.send(result)
+  })
+  
+})
+app.post("/addAdmin", async( req , response)=>{
+  const {newName, newAddr, adderAddr} = req.body
+  console.log("new name", newName);
+  console.log("new Address", newAddr);
+  console.log("Old Addrss", adderAddr);
+  const newAddrHash = await hashString(newAddr)
+  const oldAddrHash = await hashString(adderAddr)
+  console.log(newAddrHash, "Added Hash");
+  console.log(oldAddrHash, "Sender Hash");
+  
+  
+  
+  await contract.addAdmin(newAddrHash, oldAddrHash, newName)
+  response.send("Ran")
+})
 app.post("/addAdminOwner", async( req , response)=>{
   const {name, newAddr} = req.body
   const addrHash = await hashString(newAddr)
   await contract.addAdmin(addrHash, "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", name )
   response.send("Yes")
+})
+app.post("/addMeeting", ( req , response)=>{
+  let {host, timeStart, dateStart, timeEnd, address} = req.body
+  console.log("Request body:", req.body);  
+  if (timeEnd === null || timeEnd === undefined){    
+    timeEnd = ""
+  }
+  if (!host || !timeStart || !dateStart || !address) {
+    response.send("Missing Required Fields")
+    return
+  }
+    const query = `INSERT INTO Meeting (host, timeStart, dateStart, timeEnd, address) VALUES (?, ?, ?, ?, ?)`
+    const values = [host, timeStart, dateStart, timeEnd, address]
+    connection.query(query, values, (err, result)=>{
+      if (err) throw err
+      console.log(result);
+      response.send(result)
+    })
+    
+})
+app.post("/verifyAdmin", async( req , response)=>{
+  const {checkName} = req.body
+  const list = await contract.getAllAdminNames()
+  console.log(list);
+  
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] == checkName){
+      response.send(true)
+    }
+    
+  }
+  response.send(false)
 })
