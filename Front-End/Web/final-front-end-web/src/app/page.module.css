@@ -11,6 +11,14 @@
   align-items: center;
   text-align: center;
 }
+.page input{
+  width: 40vw;
+  margin: 15px;
+  height: 30px;
+}
+.page button{
+  width: 150px;
+}
 .header{
   position: fixed;
   top: 0;
