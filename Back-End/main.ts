@@ -66,6 +66,18 @@ app.get("/", ( _ , response)=>{
   response.send("Welcome to our Route")
 })
 
+
+app.post("/removeAdmin", async( req , response)=>{
+  const {removeAddr, adminAddr} = req.body
+  const removeHash = hashString(removeAddr)
+  const adminHash = hashString(adminAddr)
+  console.log('rand');
+  
+  console.log(await contract.removeAdmin(removeHash,adminHash))
+  response.send("Ran")
+})
+
+
 app.get("/getAdminNameList", async( _ , response)=>{
   console.log("Getting admins");
   

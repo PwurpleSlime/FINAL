@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { JSX, useEffect, useRef, useState } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ethers } from "ethers"
-import { AdminCard } from "./Components/index" 
+import { AdminCard, MeetingCard } from "./Components/index" 
 
 // End o Imports
 // Start of page.tsx
@@ -23,13 +23,16 @@ export default function Home() {
   const [isAdminPage, setIsAdminPage] = useState(true)
   const [isMeetingPage, setIsMeetingPage] = useState(false)
   const [isAddAdminPage, setIsAddAdminPage] = useState(false)
+  const [isRemoveAdminPage, setIsRemoveAdminPage] = useState(false)
   const [walletIsAvalible, setWalletIsAvalible] = useState(true)
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
   const [adminList, setAdminList] = useState<any[]>([])
+  const [meetingList, setMeetingList] = useState<any[]>([])
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [addAdminName, setAddAdminName] = useState("")
   const [addAdminAddr, setAddAdminAddr] = useState("")
+  const [removeAdminAddr, setRemoveAdminAddr] = useState("")
 
   async function addAdmin() {
     if (addAdminName == "" || addAdminAddr == "" || provider == null){
@@ -62,17 +65,14 @@ export default function Home() {
       console.error("Error fetching admin list:", err)
     })
 
-
-    if (adminRef){
-      if (adminList != null){
-        if (adminZone){
-          for (let i = 0; i < 1; i++) {
-            const card = AdminCard(adminList[i])
-            
-          }
-        }
-      }
-    }
+    fetch("http://10.200.136.135:3005/getMeetingPlaces")
+    .then((res)=>res.json())
+    .then((data: string[])=>{
+      setMeetingList(data)
+    })
+    .catch((err)=>{
+      console.error("Error fetching admin list:", err)
+    })
   }, [isAdminPage])
   if (thre){
   // THREE vars. That is four vars hmmmmm?
@@ -287,11 +287,60 @@ export default function Home() {
             setIsAddAdminPage(true)
           }}><h1>Add Admin</h1></button>
           <button onClick={()=>{
-            
+            setIsAdminPage(false)
+            setIsMeetingPage(false)
+            setIsAddAdminPage(false)
+            setIsRemoveAdminPage(true)
+
           }}><h1>Remove Admin</h1></button>
 
         </div>
       </div>
+      </>
+    )
+  }else if (isRemoveAdminPage){
+    return (
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+        <section className={styles.header}>
+        <div className={styles.big}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+            setIsRemoveAdminPage(false)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(true)
+          setIsRemoveAdminPage(false)
+
+        }} className={styles.small}>
+          <button><h1>Meeting</h1></button>
+        </div>
+        </section>
+
+        <div className={styles.page}>
+          <h1>REMOVE ADMINS</h1>
+          <input type="text" placeholder='Address' value={removeAdminAddr} onChange={(e)=>{
+            setRemoveAdminAddr(e.target.value)
+          }}/>
+          <button onClick={()=>{
+            fetch("http://10.200.136.135:3005/removeAdmin",{
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                removeHash: removeAdminAddr,
+                adminHash: account,
+              }),
+            });
+          }}><h1>Submit</h1></button>
+        </div>
       </>
     )
   }else if(isMeetingPage){
@@ -319,7 +368,10 @@ export default function Home() {
         </div>
       </section>
       <div className={styles.page}>
-        <h1>Meeting</h1>
+        <MeetingCard hostName={'Host Name'} timeStart={'Time Start'} dateStart={'Date Start'} timeEnd={'Time End'} address={'Address'}></MeetingCard>
+        {meetingList.map((meeting, index) => (
+          <MeetingCard key={index} hostName={meeting.host} timeStart={meeting.timeStart} dateStart={meeting.dateStart} timeEnd={meeting.timeEnd} address={meeting.address} />
+        ))}
       </div>
 
       </>
@@ -357,7 +409,7 @@ export default function Home() {
           }}/>
           <button onClick={()=>{
             addAdmin()
-          }}>Submit</button>
+          }}><h1>Submit</h1></button>
         </div>
 
       </>
