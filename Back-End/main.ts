@@ -66,6 +66,18 @@ app.get("/", ( _ , response)=>{
   response.send("Welcome to our Route")
 })
 
+
+app.post("/removeAdmin", async( req , response)=>{
+  const {removeAddr, adminAddr} = req.body
+  const removeHash = hashString(removeAddr)
+  const adminHash = hashString(adminAddr)
+  console.log('rand');
+  
+  console.log(await contract.removeAdmin(removeHash,adminHash))
+  response.send("Ran")
+})
+
+
 app.get("/getAdminNameList", async( _ , response)=>{
   console.log("Getting admins");
   
@@ -109,12 +121,24 @@ app.post("/addAdmin", async( req , response)=>{
   await contract.addAdmin(newAddrHash, oldAddrHash, newName)
   response.send("Ran")
 })
-app.post("/addAdminOwner", async( req , response)=>{
-  const {name, newAddr} = req.body
-  const addrHash = await hashString(newAddr)
-  await contract.addAdmin(addrHash, "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", name )
-  response.send("Yes")
+app.post("/addMeeting", ( req , response)=>{
+  const {host, timeStart, dateStart, timeEnd, address} = req.body
+  const query = `INSERT INTO Meeting (host, timeStart, dateStart, timeEnd, address) VALUES (?, ?, ?, ?, ?)`;
+  const values = [host, timeStart, dateStart, timeEnd, address];
+
+connection.query(query, values, (err, results) => {
+  if (err) {
+    console.error("Database error:", err);
+    // handle error
+  } else {
+    console.log("Insert successful:", results);
+    // handle success
+  }
+});
+
+    response.send("Welcome to our Route")
 })
+
 app.post("/addMeeting", ( req , response)=>{
   let {host, timeStart, dateStart, timeEnd, address} = req.body
   console.log("Request body:", req.body);  

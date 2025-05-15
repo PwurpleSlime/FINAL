@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { JSX, useEffect, useRef, useState } from "react";
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ethers } from "ethers"
-import { AdminCard } from "./Components/index" 
+import { AdminCard, MeetingCard } from "./Components/index" 
 
 // End o Imports
 // Start of page.tsx
@@ -21,35 +21,83 @@ export default function Home() {
   const [hasWallet, setWallet] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [isAdminPage, setIsAdminPage] = useState(true)
+  const [isMeetingPage, setIsMeetingPage] = useState(false)
+  const [isAddAdminPage, setIsAddAdminPage] = useState(false)
+  const [isRemoveAdminPage, setIsRemoveAdminPage] = useState(false)
+  const [isAddMeetingPage, setIsAddMeetingPage] = useState(false)
   const [walletIsAvalible, setWalletIsAvalible] = useState(true)
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
   const [adminList, setAdminList] = useState<any[]>([])
+  const [meetingList, setMeetingList] = useState<any[]>([])
   const [elements, setElements] = useState<JSX.Element[]>([]);
+  const [addAdminName, setAddAdminName] = useState("")
+  const [addAdminAddr, setAddAdminAddr] = useState("")
+  const [removeAdminAddr, setRemoveAdminAddr] = useState("")
+  const [addMeetingHost, setAddMeetingHost] = useState("")
+  const [addMeetingTimeStart, setAddMeetingTimeStart] = useState("")
+  const [addMeetingDateStart, setAddMeetingDateStart] = useState("")
+  const [addMeetingTimeEnd, setAddMeetingTimeEnd] = useState("")
+  const [addMeetingLocation, setAddMeetingLocation] = useState("")
 
+  async function addMeeting(){
+    if (addMeetingHost == "" || addMeetingDateStart == "" || addMeetingTimeStart == "" || addMeetingLocation == "" || provider == null){
+      return
+    }
+    await fetch('http://10.200.136.135:3005/addMeeting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        host: addMeetingHost,
+        timeStart: addMeetingTimeStart,
+        dateStart: addMeetingDateStart,
+        timeEnd: addMeetingTimeEnd,
+        address: addMeetingLocation
+      }),
+    });
+ 
+  }
+  async function addAdmin() {
+    if (addAdminName == "" || addAdminAddr == "" || provider == null){
+      return
+    }
 
-
+    
+    await fetch('http://10.200.136.135:3005/addAdmin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        newName: addAdminName,
+        newAddr: addAdminAddr,
+        adderAddr: account
+      }),
+    });
+  }
 
   useEffect(()=>{
     const adminZone = document.querySelector(".adminZone")
+    
+    fetch("http://10.200.136.135:3005/getAdminNameList")
+    .then((res)=>res.json())
+    .then((data: string[])=>{
+      setAdminList(data)
+    })
+    .catch((err)=>{
+      console.error("Error fetching admin list:", err)
+    })
 
-    setAdminList([
-      "Alice White",
-      "Bob Vance",
-      "John Skyrim"
-    ])
-
-
-    if (adminRef){
-      if (adminList != null){
-        if (adminZone){
-          for (let i = 0; i < 1; i++) {
-            const card = AdminCard(adminList[i])
-            
-          }
-        }
-      }
-    }
+    fetch("http://10.200.136.135:3005/getMeetingPlaces")
+    .then((res)=>res.json())
+    .then((data: string[])=>{
+      setMeetingList(data)
+    })
+    .catch((err)=>{
+      console.error("Error fetching admin list:", err)
+    })
   }, [isAdminPage])
   if (thre){
   // THREE vars. That is four vars hmmmmm?
@@ -246,6 +294,7 @@ export default function Home() {
         </div>
         <div onClick={()=>{
           setIsAdminPage(false)
+          setIsMeetingPage(true)
         }} className={styles.small}>
           <button><h1>Meeting</h1></button>
         </div>
@@ -256,10 +305,70 @@ export default function Home() {
             <AdminCard key={index} adminName={admin} />
           ))}
         </div>
+        <div className={styles.bottomButtons}>
+          <button onClick={()=>{
+            setIsAdminPage(false)
+            setIsMeetingPage(false)
+            setIsAddAdminPage(true)
+          }}><h1>Add Admin</h1></button>
+          <button onClick={()=>{
+            setIsAdminPage(false)
+            setIsMeetingPage(false)
+            setIsAddAdminPage(false)
+            setIsRemoveAdminPage(true)
+
+          }}><h1>Remove Admin</h1></button>
+
+        </div>
       </div>
       </>
     )
-  }else {
+  }else if (isRemoveAdminPage){
+    return (
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+        <section className={styles.header}>
+        <div className={styles.big}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+            setIsRemoveAdminPage(false)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(true)
+          setIsRemoveAdminPage(false)
+
+        }} className={styles.small}>
+          <button><h1>Meeting</h1></button>
+        </div>
+        </section>
+
+        <div className={styles.page}>
+          <h1>REMOVE ADMINS</h1>
+          <input type="text" placeholder='Address' value={removeAdminAddr} onChange={(e)=>{
+            setRemoveAdminAddr(e.target.value)
+          }}/>
+          <button onClick={()=>{
+            fetch("http://10.200.136.135:3005/removeAdmin",{
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                removeHash: removeAdminAddr,
+                adminHash: account,
+              }),
+            });
+          }}><h1>Submit</h1></button>
+        </div>
+      </>
+    )
+  }else if(isMeetingPage){
     return (
       <>
         <div>
@@ -272,17 +381,113 @@ export default function Home() {
         <div className={styles.small}>
           <button onClick={()=>{
             setIsAdminPage(true)
+            setIsMeetingPage(false)
+
           }}><h1>Admin</h1></button>
         </div>
         <div onClick={()=>{
           setIsAdminPage(false)
+          setIsMeetingPage(true)
         }} className={styles.big}>
           <button><h1>Meeting</h1></button>
         </div>
       </section>
       <div className={styles.page}>
-        <h1>Meeting</h1>
+        <MeetingCard hostName={'Host Name'} timeStart={'Time Start'} dateStart={'Date Start'} timeEnd={'Time End'} address={'Address'}></MeetingCard>
+        {meetingList.map((meeting, index) => (
+          <MeetingCard key={index} hostName={meeting.host} timeStart={meeting.timeStart} dateStart={meeting.dateStart} timeEnd={meeting.timeEnd} address={meeting.address} />
+        ))}
+        <button onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(false)
+          setIsAddMeetingPage(true)
+        }}><h1>Add Meeting</h1></button>
       </div>
+
+      </>
+    )
+  }else if (isAddMeetingPage){
+    return(
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+        <section className={styles.header}>
+        <div className={styles.small}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+            setIsMeetingPage(false)
+            setIsAddMeetingPage(false)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(true)
+          setIsAddMeetingPage(false)
+        }} className={styles.big}>
+          <button><h1>Meeting</h1></button>
+        </div>
+      </section>
+
+        <div className={styles.page}>
+          <input type="text" placeholder='Host Name As of Input' value={addMeetingHost} onChange={(e)=>{
+            setAddMeetingHost(e.target.value)
+          }}/>
+          <input type="text" placeholder='Time Start' value={addMeetingTimeStart} onChange={(e)=>{
+            setAddMeetingTimeStart(e.target.value)
+          }}/>
+          <input type="text" placeholder='Date Start' value={addMeetingDateStart} onChange={(e)=>{
+            setAddMeetingDateStart(e.target.value)
+          }}/>
+          <input type="text" placeholder='Time End' value={addMeetingTimeEnd} onChange={(e)=>{
+            setAddMeetingTimeEnd(e.target.value)
+          }}/>
+          <input type="text" placeholder='Location of Meeting' value={addMeetingLocation} onChange={(e)=>{
+            setAddMeetingLocation(e.target.value)
+          }}/>
+          <button onClick={()=>{
+            addMeeting()
+          }}><h4>Submit</h4></button>
+        </div>
+      </>
+    )
+  }else if (isAddAdminPage){
+    return (
+      <>
+          <div>
+            <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+            {/* Still have not the faintest idea what box Ref is */}
+          </div>
+        <section className={styles.header}>
+          <div className={styles.big}>
+            <button onClick={()=>{
+              setIsAdminPage(true)
+              setIsMeetingPage(false)
+              setIsAddAdminPage(false)
+            }}><h1>Admin</h1></button>
+          </div>
+          <div onClick={()=>{
+            setIsAdminPage(false)
+            setIsMeetingPage(true)
+            setIsAddAdminPage(false)
+          }} className={styles.small}>
+            <button><h1>Meeting</h1></button>
+          </div>
+        </section>
+        <div className={styles.page}>
+          <h1>Add Admins</h1>
+          <input type="text" placeholder='Full Name Here' value={addAdminName} onChange={(e)=>{
+            setAddAdminName(e.target.value)
+          }}/>
+          <input type="text" placeholder="Full Metamask Wallet Address" value={addAdminAddr} onChange={(e)=>{
+            setAddAdminAddr(e.target.value)
+          }}/>
+          <button onClick={()=>{
+            addAdmin()
+          }}><h1>Submit</h1></button>
+        </div>
 
       </>
     )

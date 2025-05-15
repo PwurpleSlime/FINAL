@@ -11,7 +11,7 @@ contract FinalContract is Ownable {
 
     }
     Admin[] private adminList;
-    constructor( string memory _firstAdminName, string memory _firstAdminHash, address _initialOwner) Ownable(_initialOwner) {
+    constructor( string memory _firstAdminName, string memory _firstAdminHash ) Ownable(msg.sender) {
         adminList.push(Admin({
             name: _firstAdminName,
             addr: _firstAdminHash
