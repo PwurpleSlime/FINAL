@@ -1,0 +1,7 @@
+contract: 
+          npx hardhat node
+          npx hardhat ignition deploy ignition/modules/Final.ts --network localhost
+deno: 
+    Deno run dev
+main.ts
+    npm run dev

@@ -1,0 +1,7 @@
+title Admin Creates New Meeting
+Admin -> Front-End: Input meeting information
+Front-End -> Back-End: Request new meeting
+Back-End -> Database: Add new meeting
+Database -> Back-End: Return Success
+Back-End -> Front-End: Return Success
+Front-End -> Admin: Display Success
