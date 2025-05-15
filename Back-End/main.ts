@@ -160,14 +160,19 @@ app.post("/addMeeting", ( req , response)=>{
 })
 app.post("/verifyAdmin", async( req , response)=>{
   const {checkName} = req.body
+  console.log(checkName);
+  let found = false
   const list = await contract.getAllAdminNames()
   console.log(list);
   
   for (let i = 0; i < list.length; i++) {
+
     if (list[i] == checkName){
+      found = true
       response.send(true)
     }
     
   }
-  response.send(false)
+  if (!found) response.send(false)
+  
 })
