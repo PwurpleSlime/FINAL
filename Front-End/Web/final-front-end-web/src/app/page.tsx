@@ -24,6 +24,7 @@ export default function Home() {
   const [isMeetingPage, setIsMeetingPage] = useState(false)
   const [isAddAdminPage, setIsAddAdminPage] = useState(false)
   const [isRemoveAdminPage, setIsRemoveAdminPage] = useState(false)
+  const [isAddMeetingPage, setIsAddMeetingPage] = useState(false)
   const [walletIsAvalible, setWalletIsAvalible] = useState(true)
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null)
@@ -33,7 +34,31 @@ export default function Home() {
   const [addAdminName, setAddAdminName] = useState("")
   const [addAdminAddr, setAddAdminAddr] = useState("")
   const [removeAdminAddr, setRemoveAdminAddr] = useState("")
+  const [addMeetingHost, setAddMeetingHost] = useState("")
+  const [addMeetingTimeStart, setAddMeetingTimeStart] = useState("")
+  const [addMeetingDateStart, setAddMeetingDateStart] = useState("")
+  const [addMeetingTimeEnd, setAddMeetingTimeEnd] = useState("")
+  const [addMeetingLocation, setAddMeetingLocation] = useState("")
 
+  async function addMeeting(){
+    if (addMeetingHost == "" || addMeetingDateStart == "" || addMeetingTimeStart == "" || addMeetingLocation == "" || provider == null){
+      return
+    }
+    await fetch('http://10.200.136.135:3005/addMeeting', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        host: addMeetingHost,
+        timeStart: addMeetingTimeStart,
+        dateStart: addMeetingDateStart,
+        timeEnd: addMeetingTimeEnd,
+        address: addMeetingLocation
+      }),
+    });
+ 
+  }
   async function addAdmin() {
     if (addAdminName == "" || addAdminAddr == "" || provider == null){
       return
@@ -372,8 +397,60 @@ export default function Home() {
         {meetingList.map((meeting, index) => (
           <MeetingCard key={index} hostName={meeting.host} timeStart={meeting.timeStart} dateStart={meeting.dateStart} timeEnd={meeting.timeEnd} address={meeting.address} />
         ))}
+        <button onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(false)
+          setIsAddMeetingPage(true)
+        }}><h1>Add Meeting</h1></button>
       </div>
 
+      </>
+    )
+  }else if (isAddMeetingPage){
+    return(
+      <>
+        <div>
+          <canvas ref={boxRef} style={{width: "100vw", height: "100vh"}} className={`${styles.bg} bg`}></canvas> 
+          {/* Still have not the faintest idea what box Ref is */}
+        </div>
+
+        <section className={styles.header}>
+        <div className={styles.small}>
+          <button onClick={()=>{
+            setIsAdminPage(true)
+            setIsMeetingPage(false)
+            setIsAddMeetingPage(false)
+          }}><h1>Admin</h1></button>
+        </div>
+        <div onClick={()=>{
+          setIsAdminPage(false)
+          setIsMeetingPage(true)
+          setIsAddMeetingPage(false)
+        }} className={styles.big}>
+          <button><h1>Meeting</h1></button>
+        </div>
+      </section>
+
+        <div className={styles.page}>
+          <input type="text" placeholder='Host Name As of Input' value={addMeetingHost} onChange={(e)=>{
+            setAddMeetingHost(e.target.value)
+          }}/>
+          <input type="text" placeholder='Time Start' value={addMeetingTimeStart} onChange={(e)=>{
+            setAddMeetingTimeStart(e.target.value)
+          }}/>
+          <input type="text" placeholder='Date Start' value={addMeetingDateStart} onChange={(e)=>{
+            setAddMeetingDateStart(e.target.value)
+          }}/>
+          <input type="text" placeholder='Time End' value={addMeetingTimeEnd} onChange={(e)=>{
+            setAddMeetingTimeEnd(e.target.value)
+          }}/>
+          <input type="text" placeholder='Location of Meeting' value={addMeetingLocation} onChange={(e)=>{
+            setAddMeetingLocation(e.target.value)
+          }}/>
+          <button onClick={()=>{
+            addMeeting()
+          }}><h4>Submit</h4></button>
+        </div>
       </>
     )
   }else if (isAddAdminPage){
